@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 
 # Installs required packages
-RUN apt-get update && \
+RUN sudo add-apt-repository universe && apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
     wget \
     gnupg2 \
