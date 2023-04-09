@@ -1,0 +1,52 @@
+FROM ubuntu:latest
+# atualiza os repositórios
+RUN apt-get update
+# instala as dependências necessárias
+RUN apt-get install -y curl gnupg
+# adiciona o repositório do Node.js ao sistema
+RUN curl -sL https://deb.nodesource.com/setup_19.x | bash -
+RUN apt-get install libc6
+# instala o Node.js e o NPM
+RUN apt-get install -y nodejs
+RUN apt-get install -y git
+WORKDIR /app
+
+# cria uma pasta específica para o Hardhat e entra nela
+RUN mkdir /app/hardhat
+WORKDIR /app/hardhat
+
+# instala o Hardhat
+RUN npm install --save-dev hardhat
+
+# instala o plugin do Hardhat para a Mumbai testnet
+RUN npm install --save-dev @nomiclabs/hardhat-etherscan @nomiclabs/hardhat-waffle ethereum-waffle chai @nomiclabs/hardhat-ethers
+
+# adiciona as chaves da API do Etherscan para o plugin do Hardhat
+ENV ETHERSCAN_API_KEY=ETHERSCAN-API-KEY
+
+# define o nome da rede como Mumbai
+ENV NETWORK_NAME=mumbai
+
+# adiciona as configurações da rede Mumbai ao arquivo hardhat.config.js
+RUN echo "
+require('dotenv').config();
+require('@nomiclabs/hardhat-waffle');
+require('@nomiclabs/hardhat-etherscan');
+const { API_URL, PRIVATE_KEY } = process.env;
+module.exports = {
+  solidity: '0.8.4',
+  networks: {
+    hardhat: {},
+    mumbai: {
+      url: API_URL,
+      accounts: [PRIVATE_KEY],
+    },
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY
+  }
+};
+" > hardhat.config.js
+# exibe a versão do Node.js e do NPM instalados
+RUN node -v
+RUN npm -v
