@@ -1,0 +1,34 @@
+FROM ubuntu:latest
+
+# Instala as dependências necessárias
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    xorg \
+    openbox \
+    lightdm \
+    lightdm-gtk-greeter \
+    --no-install-recommends && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configura o lightdm para iniciar o Openbox
+RUN echo '[Seat:*]' > /etc/lightdm/lightdm.conf && \
+    echo 'user-session=openbox' >> /etc/lightdm/lightdm.conf && \
+    echo 'autologin-guest=false' >> /etc/lightdm/lightdm.conf && \
+    echo 'autologin-user=' >> /etc/lightdm/lightdm.conf && \
+    echo 'autologin-user-timeout=0' >> /etc/lightdm/lightdm.conf && \
+    echo 'autologin-session=openbox' >> /etc/lightdm/lightdm.conf && \
+    echo 'greeter-session=lightdm-gtk-greeter' >> /etc/lightdm/lightdm.conf
+
+# Define o usuário que será utilizado para executar o container
+ENV USER docker
+ENV HOME /home/$USER
+
+# Cria o usuário e o diretório home
+RUN useradd -m -s /bin/bash $USER && \
+    chown -R $USER:$USER $HOME
+
+# Define o comando padrão a ser executado quando o container iniciar
+USER $USER
+WORKDIR $HOME
+CMD [ "/usr/sbin/lightdm", "-d" ]
