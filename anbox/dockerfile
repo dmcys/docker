@@ -1,0 +1,69 @@
+FROM ubuntu:latest
+
+# Installs required packages
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    wget \
+    gnupg2 \
+    ca-certificates \
+    xz-utils \
+    build-essential \
+    git \
+    lxc \
+    iptables \
+    curl \
+    dbus \
+    dbus-x11 \
+    pulseaudio \
+    libglu1 \
+    mesa-utils \
+    libgles2-mesa \
+    libpulse0 \
+    libqt5core5a \
+    libqt5gui5 \
+    libqt5widgets5 \
+    libqt5svg5 \
+    libboost-filesystem1.71.0 \
+    libboost-program-options1.71.0 \
+    libboost-regex1.71.0 \
+    libboost-system1.71.0 \
+    libboost-iostreams1.71.0 \
+    libsqlite3-0 \
+    libzstd1 \
+    xorg \
+    openbox \
+    lightdm \
+    lightdm-gtk-greeter \
+    --no-install-recommends && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Installs Anbox
+RUN echo "deb http://ppa.launchpad.net/morphis/anbox-support/ubuntu focal main" | tee /etc/apt/sources.list.d/morphis-anbox-support-focal.list && \
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 7B6CAE50B4732CEAEFC9C5F7DBB8C8C0B2395C82 && \
+    apt-get update && \
+    apt-get install -y anbox-modules-dkms anbox-bridge anbox-repository && \
+    apt-get install -y anbox && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Configures lightdm to start Openbox
+RUN echo '[Seat:*]' > /etc/lightdm/lightdm.conf && \
+    echo 'user-session=openbox' >> /etc/lightdm/lightdm.conf && \
+    echo 'autologin-guest=false' >> /etc/lightdm/lightdm.conf && \
+    echo 'autologin-user=' >> /etc/lightdm/lightdm.conf && \
+    echo 'autologin-user-timeout=0' >> /etc/lightdm/lightdm.conf && \
+    echo 'autologin-session=openbox' >> /etc/lightdm/lightdm.conf && \
+    echo 'greeter-session=lightdm-gtk-greeter' >> /etc/lightdm/lightdm.conf
+
+# Sets up user and home directory
+ENV USER docker
+ENV HOME /home/$USER
+
+RUN useradd -m -s /bin/bash $USER && \
+    chown -R $USER:$USER $HOME
+
+# Sets default command to start lightdm
+USER $USER
+WORKDIR $HOME
+CMD [ "/usr/sbin/lightdm", "-d" ]
