@@ -1,0 +1,23 @@
+FROM ubuntu:latest
+
+# atualiza os repositórios
+RUN apt-get update
+
+# instala as dependências necessárias
+RUN apt-get install -y curl gnupg
+
+# adiciona o repositório do Node.js ao sistema
+RUN curl -sL https://deb.nodesource.com/setup_19.x | bash -
+
+RUN apt-get install libc6
+
+# instala o Node.js e o NPM
+RUN apt-get install -y nodejs
+
+RUN apt-get install -y git
+
+WORKDIR /app
+
+# exibe a versão do Node.js e do NPM instalados
+RUN node -v
+RUN npm -v
