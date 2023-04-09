@@ -1,4 +1,23 @@
 FROM ubuntu:latest
+# Install software-properties-common package
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    software-properties-common \
+    --no-install-recommends && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Add repository using add-apt-repository
+RUN add-apt-repository ppa:example/example
+
+# Install other packages as needed
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    package1 \
+    package2 \
+    --no-install-recommends && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Installs required packages
 RUN sudo add-apt-repository universe && apt-get update && \
